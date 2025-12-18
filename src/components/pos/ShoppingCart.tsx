@@ -24,7 +24,7 @@ import {
   Minus,
   Plus,
   Trash2,
-  ShoppingCart,
+  ShoppingCart as ShoppingCartIcon,
   CreditCard,
   DollarSign,
   ArrowRight
@@ -90,13 +90,13 @@ export default function ShoppingCart({ onCheckout, isPaymentView }: ShoppingCart
       <div className="h-full flex flex-col">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center space-x-2">
-            <ShoppingCart className="h-5 w-5" />
+            <ShoppingCartIcon className="h-5 w-5" />
             <span>Carrito de Compras</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <ShoppingCart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <ShoppingCartIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground mb-2">El carrito está vacío</p>
             <p className="text-sm text-muted-foreground">
               Agrega productos para comenzar
@@ -113,7 +113,7 @@ export default function ShoppingCart({ onCheckout, isPaymentView }: ShoppingCart
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center space-x-2">
-            <ShoppingCart className="h-5 w-5" />
+            <ShoppingCartIcon className="h-5 w-5" />
             <span>Carrito</span>
             <Badge variant="secondary">{getItemCount()}</Badge>
           </CardTitle>

@@ -7,6 +7,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 import { 
   BarChart3, 
   TrendingUp, 
@@ -16,7 +28,8 @@ import {
   DollarSign,
   Calendar,
   Download,
-  ArrowLeft
+  ArrowLeft,
+  XCircle
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -130,6 +143,29 @@ export default function ReportsPage() {
       'REFUNDED': 'outline'
     };
     return variants[status] || 'outline';
+  };
+
+  const handleCancelSale = async (saleId: string) => {
+    try {
+      const response = await fetch(`/api/sales/${saleId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'CANCELLED' }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al cancelar la venta');
+      }
+
+      toast.success('Venta cancelada exitosamente');
+      fetchDashboardData(); // Recargar datos
+    } catch (error) {
+      console.error('Error cancelling sale:', error);
+      toast.error(error instanceof Error ? error.message : 'Error al cancelar la venta');
+    }
   };
 
   if (!isAuthenticated || !user) {
@@ -258,11 +294,39 @@ export default function ReportsPage() {
                             {sale.customerName || 'Cliente general'} • {formatDate(sale.createdAt)}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="font-semibold">{formatPrice(sale.total)}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {getPaymentMethodLabel(sale.paymentMethod)}
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <div className="font-semibold">{formatPrice(sale.total)}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {getPaymentMethodLabel(sale.paymentMethod)}
+                            </div>
                           </div>
+                          {sale.status !== 'CANCELLED' && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                                  <XCircle className="h-5 w-5" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>¿Cancelar venta?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Esta acción cancelará la venta {sale.invoiceNumber} y devolverá los productos al inventario. Esta acción no se puede deshacer.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Volver</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => handleCancelSale(sale.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Cancelar Venta
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
                         </div>
                       </div>
                     ))
